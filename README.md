@@ -24,7 +24,7 @@ py -3 app.py
 ## Connect and verify traffic
 
 1. Click **Add Profile** and enter the proxy’s name, protocol, address, port and optional credentials. Click **Save**. The app starts with an empty profile list.
-2. Open **Routing** and choose a mode, local port, and HTTPS test URL. **Save** also remembers these settings. **Test Proxy** checks the profile in the editor. **Connect** checks it again and then applies the new configuration if the certificate validates and the endpoint returns HTTP 2xx or 3xx. A failed test leaves the previous profile active. Existing tunnels keep their original upstream until they close or you disconnect.
+2. Open **Routing** and choose a mode, local port, and HTTPS test URL. The default test URL is `https://www.cloudflare.com/`. **Save** also remembers these settings. **Test Proxy** checks the profile in the editor. **Connect** checks it again and then applies the new configuration if the certificate validates and the endpoint returns HTTP 2xx or 3xx. A failed test leaves the previous profile active. Existing tunnels keep their original upstream until they close or you disconnect.
 3. Generate a request in the client app. Check **Connection Log** for the target domain, active profile name and `Tunnel established` (HTTPS) or an HTTP status. An `HTTPS test passed` row comes from ProxyFfffire’s own probe. The in-window log retains recent rows for the current session.
 
 | Mode | What it routes |
@@ -38,7 +38,7 @@ For **Claude Desktop**, select **Selected Domains → Claude Desktop**, connect,
 For a manual check with the default local port, run the following after connecting. The HTTP CONNECT upstream must permit tunneling to the target port, including port 80 when forwarding plain HTTP to that port.
 
 ```powershell
-curl.exe --proxy http://127.0.0.1:8787 https://example.com/
+curl.exe --proxy http://127.0.0.1:8787 https://www.cloudflare.com/
 ```
 
 ## Local data and recovery

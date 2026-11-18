@@ -14,7 +14,7 @@ APP_NAME = "ProxyFfffire"
 PROTOCOLS = ("HTTP CONNECT", "SOCKS5")
 MODES = ("Manual", "Selected Domains", "System Proxy")
 DEFAULT_PORT = 8787
-DEFAULT_TEST_URL = "https://example.com/"
+DEFAULT_TEST_URL = "https://www.cloudflare.com/"
 CLAUDE_PRESET = {
     "name": "Claude Desktop",
     "source": "https://code.claude.com/docs/en/desktop#network-access-requirements",
