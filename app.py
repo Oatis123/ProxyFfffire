@@ -561,7 +561,8 @@ def verify_runtime(root):
         raise OSError("Could not locate the Python runtime DLL.")
     paths = {"Python DLL": loaded_path.value, "Tcl": root.tk.call("info", "library"), "Tk": root.getvar("tk_library")}
     for component, path in paths.items():
-        resolved = Path(path).resolve()
+        # Tk can return a Tcl path object even when its string value is a filename.
+        resolved = Path(str(path)).resolve()
         if not resolved.is_relative_to(bundle):
             raise OSError(f"{component} loaded from {resolved} instead of {bundle}.")
 
