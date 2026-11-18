@@ -5,9 +5,12 @@ import json
 import os
 import re
 import tempfile
+from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import urlsplit
+
+from presets import BUILTIN_PRESETS
 
 
 APP_NAME = "ProxyFfffire"
@@ -15,16 +18,6 @@ PROTOCOLS = ("HTTP CONNECT", "SOCKS5")
 MODES = ("Manual", "Selected Domains", "System Proxy")
 DEFAULT_PORT = 8787
 DEFAULT_TEST_URL = "https://www.cloudflare.com/"
-CLAUDE_PRESET = {
-    "name": "Claude Desktop",
-    "source": "https://code.claude.com/docs/en/desktop#network-access-requirements",
-    "verified_date": "2026-11-18",
-    "domains": [
-        "anthropic.com", "*.anthropic.com", "claude.ai", "*.claude.ai",
-        "claude.com", "*.claude.com", "claude.app", "*.claude.app",
-        "*.claudeusercontent.com", "*.claudemcpcontent.com",
-    ],
-}
 
 
 def data_dir():
@@ -153,7 +146,21 @@ class Store:
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
         except FileNotFoundError:
-            data = {"profiles": [], "presets": {"claude": dict(CLAUDE_PRESET)}, "routing": {}}
+            data = {"profiles": [], "presets": {}, "routing": {}}
+        presets = data.setdefault("presets", {})
+        names = {preset["name"].casefold() for preset in presets.values()}
+        for key, default in BUILTIN_PRESETS.items():
+            if key in presets:
+                continue
+            preset = deepcopy(default)
+            base_name = default["name"]
+            index = 1
+            while preset["name"].casefold() in names:
+                suffix = "Built-in" if index == 1 else f"Built-in {index}"
+                preset["name"] = f"{base_name} ({suffix})"
+                index += 1
+            presets[key] = preset
+            names.add(preset["name"].casefold())
         return data
 
     def save(self, data):

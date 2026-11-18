@@ -167,8 +167,8 @@ def forward_headers(headers):
     return [(name, value) for name, value in headers.items() if name.lower() not in HOP_HEADERS | tokens]
 
 
-def relay(left, right):
-    peers = {left: right, right: left}
+def relay(client, upstream):
+    peers = {client: upstream, upstream: client}
     for sock in peers:
         sock.settimeout(TIMEOUT)
     while peers:
@@ -177,9 +177,19 @@ def relay(left, right):
             return
         for source in ready:
             target = peers[source]
-            data = source.recv(BUFFER)
+            try:
+                data = source.recv(BUFFER)
+            except ConnectionError:
+                if source is client:
+                    return
+                raise ProxyError("The upstream connection was interrupted after CONNECT.") from None
             if data:
-                target.sendall(data)
+                try:
+                    target.sendall(data)
+                except ConnectionError:
+                    if target is client:
+                        return
+                    raise ProxyError("The upstream connection was interrupted after CONNECT.") from None
             else:
                 del peers[source]
                 try:
@@ -316,7 +326,10 @@ class LocalRequest(BaseHTTPRequestHandler):
         def exchange(upstream, profile):
             self.committed = True
             self.send_response_only(200, "Connection Established")
-            self.end_headers()
+            try:
+                self.end_headers()
+            except ConnectionError:
+                return
             self.server.log(host, profile.name, "Tunnel established")
             relay(self.connection, upstream)
 

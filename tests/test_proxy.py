@@ -15,10 +15,12 @@ from contextlib import contextmanager
 from dataclasses import replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 from controller import Controller
+from presets import BUILTIN_PRESETS
 from proxy import ProxyError, https_probe, receive, relay
-from settings import CLAUDE_PRESET, Profile, Store, domain_rules, make_pac
+from settings import Profile, Store, domain_rules, make_pac, parse_url
 from windows import WindowsProxy, WindowsSettings, protect, unprotect
 
 
@@ -79,7 +81,7 @@ class MockUpstream(socketserver.StreamRequestHandler):
                 self.wfile.write(b"HTTP/1.1 200 Connection established\r\n\r\n")
             try:
                 relay(self.request, origin)
-            except OSError:
+            except (OSError, ProxyError):
                 pass
 
     def http(self):
@@ -287,12 +289,62 @@ class Integration(unittest.TestCase):
         self.assertEqual(self.original, self.backend.current)
 
 
+class RelayTests(unittest.TestCase):
+    def test_connection_reset_identifies_the_failed_peer(self):
+        for reset_client in (False, True):
+            for sending in (False, True):
+                with self.subTest(reset_client=reset_client, sending=sending):
+                    client, upstream = Mock(), Mock()
+                    failed, other = (client, upstream) if reset_client else (upstream, client)
+                    if sending:
+                        other.recv.return_value = b"data"
+                        failed.sendall.side_effect = ConnectionResetError
+                    else:
+                        failed.recv.side_effect = ConnectionResetError
+                    with patch("proxy.select.select", return_value=([other if sending else failed], [], [])):
+                        if reset_client:
+                            relay(client, upstream)
+                        else:
+                            with self.assertRaisesRegex(ProxyError, "upstream connection"):
+                                relay(client, upstream)
+                    operation = failed.sendall if sending else failed.recv
+                    operation.assert_called_once()
+
+
 class SettingsTests(unittest.TestCase):
+    def test_bundled_presets_load_with_legacy_settings(self):
+        with tempfile.TemporaryDirectory() as temp:
+            store = Store(Path(temp) / "profiles.json", None, None)
+            self.assertEqual(BUILTIN_PRESETS, store.load()["presets"])
+            legacy = {
+                "profiles": [],
+                "presets": {
+                    "claude": {"name": "Claude Personal", "domains": ["claude.ai"]},
+                    "custom": {"name": "GitHub", "domains": ["github.com"]},
+                },
+                "routing": {"preset": "custom"},
+            }
+            store.path.write_text(json.dumps(legacy), encoding="utf-8")
+            loaded = store.load()
+            self.assertEqual(legacy["routing"], loaded["routing"])
+            for key, preset in legacy["presets"].items():
+                self.assertEqual(preset, loaded["presets"][key])
+            self.assertEqual("GitHub (Built-in)", loaded["presets"]["github"]["name"])
+            self.assertEqual(BUILTIN_PRESETS.keys() | {"custom"}, loaded["presets"].keys())
+            store.save(loaded)
+            self.assertEqual(loaded, store.load())
+
+    def test_bundled_preset_rules_and_sources_are_valid(self):
+        for key, preset in BUILTIN_PRESETS.items():
+            with self.subTest(preset=key):
+                self.assertTrue(preset["domains"])
+                self.assertEqual(preset["domains"], domain_rules(preset["domains"]))
+                parse_url(preset["source"].split("#", 1)[0], "https")
+
     def test_pac_javascript(self):
         port = 8787
         rules = domain_rules(["EXAMPLE.com.", "*.EXAMPLE.org", "EXAMPLE.com"])
         self.assertEqual(["example.com", "*.example.org"], rules)
-        self.assertEqual("2026-11-18", CLAUDE_PRESET["verified_date"])
         for invalid in ("http://example.com", "example.com:80", "*example.com", "*.127.0.0.1"):
             with self.assertRaises(ValueError):
                 domain_rules([invalid])
@@ -321,7 +373,7 @@ class SettingsTests(unittest.TestCase):
             store.save(data)
             self.assertNotIn(profile.password, store.path.read_text(encoding="utf-8"))
             self.assertEqual(profile, store.unpack(store.load()["profiles"][0]))
-            self.assertEqual(CLAUDE_PRESET, store.load()["presets"]["claude"])
+            self.assertEqual(BUILTIN_PRESETS["claude"], store.load()["presets"]["claude"])
 
 
 if __name__ == "__main__":

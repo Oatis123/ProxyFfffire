@@ -35,6 +35,8 @@ py -3 app.py
 
 For **Claude Desktop**, select **Selected Domains → Claude Desktop**, connect, restart Claude Desktop and send a message. Look for a matching domain row such as `claude.ai` or `api.anthropic.com`. Use **Edit Preset** or **New Preset** to maintain domain lists. The bundled preset retains the requested rules and the verification date `2026-11-18`. Its broader wildcards cover domains for which the current source lists more specific hosts. [Anthropic network access requirements](https://code.claude.com/docs/en/desktop#network-access-requirements).
 
+**Domain preset** also offers Atlassian Cloud, ChatGPT, Cursor, Docker Desktop, Figma, GitHub, GitHub Copilot, Google Drive, Docs & Sites, JetBrains IDEs, Notion, Visual Studio Code, and Zoom. **Edit Preset** shows the official network reference and the date it was checked. New built-in presets appear after an update alongside saved and edited presets. The rules match hostnames for HTTP and HTTPS traffic, including shared service hosts where listed. Some features, such as Zoom meeting media, use separate IP or UDP connections.
+
 For a manual check with the default local port, run the following after connecting. The HTTP CONNECT upstream must permit tunneling to the target port, including port 80 when forwarding plain HTTP to that port.
 
 ```powershell

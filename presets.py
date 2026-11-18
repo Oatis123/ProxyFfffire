@@ -1,0 +1,173 @@
+"""Built-in domain presets and their official network references."""
+
+
+VERIFIED_DATE = "2026-11-18"
+
+BUILTIN_PRESETS = {
+    "claude": {
+        "name": "Claude Desktop",
+        "source": "https://code.claude.com/docs/en/desktop#network-access-requirements",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "anthropic.com", "*.anthropic.com", "claude.ai", "*.claude.ai", "claude.com", "*.claude.com",
+            "claude.app", "*.claude.app", "*.claudeusercontent.com", "*.claudemcpcontent.com",
+        ],
+    },
+    "atlassian-cloud": {
+        "name": "Atlassian Cloud",
+        "source": "https://support.atlassian.com/organization-administration/docs/ip-addresses-and-domains-for-atlassian-cloud-products",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "atl-paas.net", "*.atl-paas.net", "atlassian.com", "*.atlassian.com", "ss-inf.net",
+            "*.ss-inf.net", "atlassian.net", "*.atlassian.net", "jira.com", "*.jira.com",
+            "bitbucket.org", "*.bitbucket.org", "atlassian-dev.net", "*.atlassian-dev.net",
+            "atlassian-3p.com", "*.atlassian-3p.com", "teamworkgraph.com", "www.teamworkgraph.com",
+            "teamworkgraph.ai", "www.teamworkgraph.ai", "*.awswaf.com", "*.atl.orangelogic.com",
+        ],
+    },
+    "chatgpt": {
+        "name": "ChatGPT",
+        "source": "https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "chatgpt.com", "*.chatgpt.com", "*.oaistatic.com", "*.oaiusercontent.com", "*.openai.com",
+            "*.oaistatsig.com", "*.ct.sendgrid.net", "*.intercom.io", "*.intercomcdn.com",
+            "cdn.openaimerge.com", "cdn.workos.com", "challenges.cloudflare.com", "forwarder.workos.com",
+            "frontend-apps-multi-region.workos.com", "humb.apple.com", "images.workoscdn.com",
+            "js.stripe.com", "o207216.ingest.sentry.io", "o33249.ingest.sentry.io",
+            "rum.browser-intake-datadoghq.com", "setup.workos.com", "workos.imgix.net",
+        ],
+    },
+    "cursor": {
+        "name": "Cursor",
+        "source": "https://cursor.com/docs/enterprise/network-configuration",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "cursor.com", "*.cursor.com", "*.cursor.sh", "cursor-cdn.com", "*.cursor-cdn.com",
+            "marketplace.cursorapi.com", "*.cursorapi.com", "*.cursorvm.com", "accounts.spacex.ai",
+            "accounts.x.ai", "accounts.spacexsi.com", "auth.grok.com", "auth.grokusercontent.com",
+            "auth.grokipedia.com",
+        ],
+    },
+    "docker-desktop": {
+        "name": "Docker Desktop",
+        "source": "https://docs.docker.com/desktop/enterprise/allow-list/",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "notify.bugsnag.com", "sessions.bugsnag.com", "auth.docker.io", "cdn.auth0.com",
+            "login.docker.com", "auth.docker.com", "desktop.docker.com", "hub.docker.com",
+            "registry-1.docker.io", "production.cloudfront.docker.com",
+            "docker-pinata-support.s3.amazonaws.com", "api.dso.docker.com", "api.docker.com",
+            "api.offload.docker.com", "api.sandboxes-cloud.docker.com", "dhi.io",
+            "registry.scout.docker.com", "ai-backend-service.docker.com",
+        ],
+    },
+    "figma": {
+        "name": "Figma",
+        "source": "https://help.figma.com/hc/en-us/articles/19424714305943-Adjust-your-network-settings",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "figma.com", "*.figma.com", "*.figma.site", "*.awswaf.com", "*.esm.sh", "*.jsdelivr.net",
+            "*.figma.app", "*.arkoselabs.com", "*.weavy.ai", "*.figmaweave.com", "*.prodregistryv2.org",
+        ],
+    },
+    "github": {
+        "name": "GitHub",
+        "source": "https://docs.github.com/en/get-started/using-github/allowing-access-to-githubs-services-from-a-restricted-network",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "github.com", "*.github.com", "*.github.dev", "*.github.io", "*.githubassets.com",
+            "*.githubusercontent.com",
+        ],
+    },
+    "github-copilot": {
+        "name": "GitHub Copilot",
+        "source": "https://docs.github.com/en/copilot/reference/copilot-allowlist-reference",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "github.com", "*.github.com", "*.githubassets.com", "*.githubusercontent.com",
+            "*.githubcopilot.com", "default.exp-tas.com", "production-copilot-host.webpubsub.azure.com",
+            "production-copilot-host-centralus.webpubsub.azure.com",
+            "production-copilot-host-centralus-02.webpubsub.azure.com",
+            "production-copilot-host-westus.webpubsub.azure.com",
+            "production-copilot-host-westus3.webpubsub.azure.com",
+            "production-copilot-host-eastasia.webpubsub.azure.com",
+            "production-copilot-host-austriaeast.webpubsub.azure.com",
+        ],
+    },
+    "google-drive": {
+        "name": "Google Drive, Docs & Sites",
+        "source": "https://knowledge.workspace.google.com/admin/drive/drive-and-sites-firewall-and-proxy-settings",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "www.google.com", "accounts.google.com", "googledrive.com", "drive.google.com",
+            "*.drive.google.com", "drive.usercontent.google.com",
+            "drive-data-export.usercontent.google.com", "drive-data-export-eu.usercontent.google.com",
+            "docs.google.com", "*.docs.google.com", "sheets.google.com", "slides.google.com",
+            "takeout.google.com", "gg.google.com", "script.google.com", "ssl.google-analytics.com",
+            "video.google.com", "s.ytimg.com", "apis.google.com", "*.googleapis.com",
+            "*.googleusercontent.com", "*.gstatic.com", "*.gvt1.com", "inputtools.google.com",
+            "sites.google.com", "*.sites.google.com", "*.googlegroups.com", "*.usercontent.google.com",
+            "ipv4.google.com", "fcmconnection.googleapis.com", "signaler-pa.googleapis.com",
+            "clients0.google.com", "*.clients0.google.com", "lh0.google.com",
+            "0.client-channel.google.com", "clients1.google.com", "*.clients1.google.com",
+            "lh1.google.com", "1.client-channel.google.com", "clients2.google.com",
+            "*.clients2.google.com", "lh2.google.com", "2.client-channel.google.com",
+            "clients3.google.com", "*.clients3.google.com", "lh3.google.com",
+            "3.client-channel.google.com", "clients4.google.com", "*.clients4.google.com",
+            "lh4.google.com", "4.client-channel.google.com", "clients5.google.com",
+            "*.clients5.google.com", "lh5.google.com", "5.client-channel.google.com",
+            "clients6.google.com", "*.clients6.google.com", "lh6.google.com",
+            "6.client-channel.google.com", "clients7.google.com", "*.clients7.google.com",
+            "lh7.google.com", "7.client-channel.google.com", "clients8.google.com",
+            "*.clients8.google.com", "lh8.google.com", "8.client-channel.google.com",
+            "clients9.google.com", "*.clients9.google.com", "lh9.google.com",
+            "9.client-channel.google.com",
+        ],
+    },
+    "jetbrains-ides": {
+        "name": "JetBrains IDEs",
+        "source": "https://support.jetbrains.com/hc/en-us/articles/40250675463570-Firewall-or-proxy-allowlist-for-IntelliJ-based-IDEs-required-hosts-and-ports",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "www.jetbrains.com", "account.jetbrains.com", "oauth.account.jetbrains.com",
+            "frameworks.jetbrains.com", "download.jetbrains.com", "download-cdn.jetbrains.com",
+            "download-cf.jetbrains.com", "plugins.jetbrains.com", "downloads.marketplace.jetbrains.com",
+            "resources.jetbrains.com", "cloudconfig.jetbrains.com", "api.jetbrains.ai",
+            "api.jetbrains.cloud", "api.app.prod.grazie.aws.intellij.net", "api.ai.jetbrains.com.cn",
+        ],
+    },
+    "notion": {
+        "name": "Notion",
+        "source": "https://www.notion.com/help/allowlist-ip",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "notion.com", "app.notion.com", "api.notion.com", "audioprocessor.app.notion.com",
+            "notion.site", "*.notion.site", "notion-custom.com", "*.notion-custom.com",
+            "img.notionusercontent.com", "notionusercontent.com", "secure.notion-static.com",
+        ],
+    },
+    "vscode": {
+        "name": "Visual Studio Code",
+        "source": "https://code.visualstudio.com/docs/setup/network#_common-hostnames",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "update.code.visualstudio.com", "code.visualstudio.com", "go.microsoft.com",
+            "marketplace.visualstudio.com", "*.gallery.vsassets.io", "*.gallerycdn.vsassets.io",
+            "rink.hockeyapp.net", "raw.githubusercontent.com", "vsmarketplacebadges.dev",
+            "*.vscode-cdn.net", "vscode.download.prss.microsoft.com",
+            "download.visualstudio.microsoft.com", "vscode-sync.trafficmanager.net",
+            "vscode-sync-insiders.trafficmanager.net", "vscode.dev", "*.vscode-unpkg.net",
+            "default.exp-tas.com",
+        ],
+    },
+    "zoom": {
+        "name": "Zoom",
+        "source": "https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0060548",
+        "verified_date": VERIFIED_DATE,
+        "domains": [
+            "zoom.us", "*.zoom.us", "zoom.com", "*.zoom.com", "cdn.cookielaw.org",
+            "googletagmanager.com", "gstatic.com", "googleapis.com", "*.hcaptcha.com",
+        ],
+    },
+}
