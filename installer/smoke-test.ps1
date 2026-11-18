@@ -18,9 +18,10 @@ $uninstaller = Join-Path $appDir 'unins000.exe'
 $localData = Join-Path $qaRoot 'LocalAppData'
 $profileDir = Join-Path $localData 'ProxyFfffire'
 $profileFile = Join-Path $profileDir 'profiles.json'
+$smokeReport = Join-Path $qaRoot 'gui-error.txt'
 $profileFixture = '{"profiles":[{"id":"sample","name":"Smoke Profile","protocol":"HTTP CONNECT","host":"proxy.example","port":8080,"username":"","protected_password":""}],"presets":{"sample":{"name":"Smoke Preset","domains":["example.com"]}},"routing":{"preset":"sample"}}'
 $environment = @{}
-foreach ($name in @('PATH', 'LOCALAPPDATA', 'PYTHONPATH', 'PYTHONHOME', 'TCL_LIBRARY', 'TK_LIBRARY')) {
+foreach ($name in @('PATH', 'LOCALAPPDATA', 'PYTHONPATH', 'PYTHONHOME', 'TCL_LIBRARY', 'TK_LIBRARY', 'PROXYFFFIRE_SMOKE_REPORT')) {
     $environment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
 
@@ -32,7 +33,12 @@ function Invoke-QaProcess([string] $File, [string] $Arguments, [int] $Timeout = 
         $process.Kill()
         throw "Timed out running $File"
     }
-    if ($process.ExitCode -ne 0) { throw "$File returned exit code $($process.ExitCode)" }
+    if ($process.ExitCode -ne 0) {
+        if ($File -eq $exe -and (Test-Path -LiteralPath $smokeReport)) {
+            Write-Host (Get-Content -LiteralPath $smokeReport -Raw -Encoding utf8)
+        }
+        throw "$File returned exit code $($process.ExitCode)"
+    }
 }
 
 function Invoke-QaUninstall {
@@ -48,6 +54,7 @@ New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
 try {
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
     $env:LOCALAPPDATA = $localData
+    $env:PROXYFFFIRE_SMOKE_REPORT = $smokeReport
     foreach ($name in @('PYTHONPATH', 'PYTHONHOME', 'TCL_LIBRARY', 'TK_LIBRARY')) {
         [Environment]::SetEnvironmentVariable($name, $null, 'Process')
     }
@@ -55,11 +62,13 @@ try {
     Invoke-QaProcess $installerPath $setupArgs
     if (-not (Test-Path -LiteralPath $uninstallKey)) { throw 'Missing current-user uninstall entry.' }
     if (-not (Test-Path -LiteralPath $shortcut)) { throw 'Missing Start Menu shortcut.' }
+    Write-Host 'Launching the first installation.'
     Invoke-QaProcess $exe '--smoke-test' 15000
 
     Set-Content -LiteralPath $profileFile -Value $profileFixture -Encoding ascii
     Invoke-QaProcess $installerPath $setupArgs
     if ((Get-Content -LiteralPath $profileFile -Raw).Trim() -ne $profileFixture) { throw 'Setup altered user settings.' }
+    Write-Host 'Launching the reinstalled app.'
     Invoke-QaProcess $exe '--smoke-test' 15000
 
     Invoke-QaUninstall

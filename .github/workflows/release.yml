@@ -1,6 +1,7 @@
 name: ProxyFfffire Windows Release
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -39,10 +40,14 @@ jobs:
           if ($process.ExitCode -ne 0) { throw 'Inno Setup installation failed.' }
           "INNO_COMPILER=$(Join-Path $compiler 'ISCC.exe')" >> $env:GITHUB_ENV
       - name: Build installer and checksum
-        run: ./installer/build.ps1 -Tag $env:GITHUB_REF_NAME -Python python -Iscc $env:INNO_COMPILER
+        run: |
+          $tag = if ($env:GITHUB_EVENT_NAME -eq 'push') { $env:GITHUB_REF_NAME } else { 'v0.0.0' }
+          "BUILD_TAG=$tag" >> $env:GITHUB_ENV
+          ./installer/build.ps1 -Tag $tag -Python python -Iscc $env:INNO_COMPILER
       - name: Verify install, bundled launch, reinstall and uninstall
-        run: ./installer/smoke-test.ps1 -Installer "release/ProxyClient-Setup-${env:GITHUB_REF_NAME}-x64.exe"
+        run: ./installer/smoke-test.ps1 -Installer "release/ProxyClient-Setup-${env:BUILD_TAG}-x64.exe"
       - name: Publish GitHub Release assets
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

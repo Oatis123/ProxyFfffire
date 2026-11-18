@@ -1,6 +1,7 @@
 """ProxyFfffire Windows desktop client."""
 
 import ctypes as ct
+import os
 import queue
 import sys
 import threading
@@ -539,8 +540,11 @@ def main():
             if smoke:
                 root.after(250, window.close)
             root.mainloop()
-    except (OSError, ValueError, KeyError, TypeError, tk.TclError):
-        if not smoke and root is not None:
+    except (OSError, ValueError, KeyError, TypeError, tk.TclError) as error:
+        report = os.environ.get("PROXYFFFIRE_SMOKE_REPORT") if smoke else None
+        if report:
+            Path(report).write_text(f"{type(error).__name__}: {error}\n", encoding="utf-8")
+        elif not smoke and root is not None:
             style_window(root)
             notice(root, "Could not start ProxyFfffire. Check for an open window or unreadable local data.")
         return 1
@@ -555,9 +559,11 @@ def verify_runtime(root):
     module_path.restype = ct.c_uint32
     if not module_path(ct.pythonapi._handle, loaded_path, len(loaded_path)):
         raise OSError("Could not locate the Python runtime DLL.")
-    paths = (loaded_path.value, root.tk.call("info", "library"), root.getvar("tk_library"))
-    if any(not Path(path).resolve().is_relative_to(bundle) for path in paths):
-        raise OSError("The installed app loaded a runtime outside the bundle.")
+    paths = {"Python DLL": loaded_path.value, "Tcl": root.tk.call("info", "library"), "Tk": root.getvar("tk_library")}
+    for component, path in paths.items():
+        resolved = Path(path).resolve()
+        if not resolved.is_relative_to(bundle):
+            raise OSError(f"{component} loaded from {resolved} instead of {bundle}.")
 
 
 if __name__ == "__main__":
