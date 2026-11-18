@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.build-tools/
+.venv*/
+build/
+dist/
+release/
+*.spec
+*.exe
+*.sha256
+profiles.json
+windows-proxy-backup.json
