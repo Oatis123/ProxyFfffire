@@ -27,6 +27,8 @@ py -3 app.py
 2. Open **Routing** and choose a mode, local port, and HTTPS test URL. The default test URL is `https://www.cloudflare.com/`. **Save** also remembers these settings. **Test Proxy** checks the profile in the editor. **Connect** checks it again and then applies the new configuration if the certificate validates and the endpoint returns HTTP 2xx or 3xx. A failed test leaves the previous profile active. Existing tunnels keep their original upstream until they close or you disconnect.
 3. Generate a request in the client app. Check **Connection Log** for the target domain, active profile name and `Tunnel established` (HTTPS) or an HTTP status. An `HTTPS test passed` row comes from ProxyFfffire’s own probe. The in-window log retains recent rows for the current session.
 
+Closing the window keeps ProxyFfffire and its active connection running in the Windows notification area. Click its tray icon to reopen the window. Right-click the icon and choose **Exit** to disconnect and restore any Windows proxy settings ProxyFfffire applied.
+
 | Mode | What it routes |
 | --- | --- |
 | **Manual** | Copy the local address into an app’s HTTP proxy settings. This mode runs without taking over Windows proxy settings. |

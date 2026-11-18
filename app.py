@@ -15,6 +15,7 @@ from controller import Controller
 from proxy import ProxyError
 from settings import (APP_NAME, DEFAULT_PORT, DEFAULT_TEST_URL, MODES, PROTOCOLS,
                       Profile, Store, data_dir, domain_rules, parse_url, port_number)
+from tray import TrayIcon
 from windows import Session, WindowsBackend, WindowsProxy, protect, unprotect
 
 
@@ -111,6 +112,7 @@ class Window:
         self.results = queue.SimpleQueue()
         self.controller = Controller(WindowsProxy(WindowsBackend(), path / "windows-proxy-backup.json"), self.log)
         self.busy = self.closing = False
+        self.tray = None
         self.edit_id = ""
         self.form = {key: tk.StringVar(root) for key in FORM_FIELDS}
         self.open_label = tk.StringVar(root)
@@ -136,7 +138,7 @@ class Window:
         self.refresh_presets()
         self.refresh_active()
         self.form["name"].trace_add("write", self.update_title)
-        root.protocol("WM_DELETE_WINDOW", self.close)
+        root.protocol("WM_DELETE_WINDOW", self.hide_window)
         root.after(60, self.poll)
 
     def button(self, parent, text, command, primary=False, action=False):
@@ -468,6 +470,8 @@ class Window:
             pass
 
     def poll(self):
+        if self.tray:
+            self.tray.poll()
         for _ in range(100):
             try:
                 row = self.logs.get_nowait()
@@ -496,6 +500,7 @@ class Window:
                     self.finish_close()
                 else:
                     self.closing = False
+                    self.show_window()
                     notice(self.root, status)
         self.root.after(60, self.poll)
 
@@ -503,9 +508,30 @@ class Window:
         self.closing = "disconnecting"
         self.run(self.controller.disconnect)
 
-    def close(self):
-        if self.closing or not self.discard():
+    def hide_window(self):
+        if self.closing:
             return
+        if self.tray and self.tray.show():
+            self.root.withdraw()
+        else:
+            self.request_exit()
+
+    def show_window(self):
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
+
+    def request_exit(self):
+        if self.closing:
+            return
+        if dialog := self.root.grab_current():
+            self.show_window()
+            dialog.lift()
+            return
+        if self.current_form() != self.baseline:
+            self.show_window()
+            if not self.discard():
+                return
         if self.busy:
             self.closing = "waiting"
             self.status.set("Finishing the current operation before closing…")
@@ -538,8 +564,18 @@ def main():
             window = Window(root, data_dir())
             root.deiconify()
             if smoke:
-                root.after(250, window.close)
-            root.mainloop()
+                root.after(250, window.request_exit)
+            else:
+                try:
+                    window.tray = TrayIcon(root, APP_NAME, icon, window.show_window, window.request_exit)
+                    window.tray.show()
+                except OSError:
+                    pass
+            try:
+                root.mainloop()
+            finally:
+                if window.tray:
+                    window.tray.close()
     except (OSError, ValueError, KeyError, TypeError, tk.TclError) as error:
         report = os.environ.get("PROXYFFFIRE_SMOKE_REPORT") if smoke else None
         if report:
